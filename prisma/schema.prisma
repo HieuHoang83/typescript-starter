@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma migrate dev --name init-database
+// npx prisma generate sau khi thay doi schema
+// npx prisma studio
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  phone    String?
+  name     String?   @map("first_name")
+  status   Int?      @db.SmallInt
+  createAt DateTime? @default(now())
+  updateAt DateTime? @updatedAt
+  posts    Post[] // định nghĩa sẽ có 1 số post có khóa ngoại là id user
+
+  @@map("tableuser")
+}
+
+model Post {
+  id      Int    @id @default(autoincrement())
+  title   String
+  sumary  String
+  content String @db.Text
+  status  Int    @default(1)
+  owner   User   @relation(fields: [ownerId], references: [id]) // ten owner chỉ mục đích của khóa ngoại đó
+  ownerId Int // định nghĩa ownerId là khóa ngoại
+
+  MucDichKhoaNgoai Category @relation(fields: [categoryId], references: [id])
+  categoryId       Int
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  createAt    DateTime  @default(now())
+  updateAt    DateTime? @updatedAt
+  posts       Post[] // định nghĩa sẽ có 1 số post có khóa ngoại là id Category
+}
